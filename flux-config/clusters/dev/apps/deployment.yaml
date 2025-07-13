@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: vllm
-          image: "jozu.ml/oyedeletemitope76/tiny-llama-vllm/vllm-cpu:1.0.1"
+          image: "jozu.ml/oyedeletemitope76/tiny-llama-vllm/vllm-cpu:1.0.2"
           ports:
             - containerPort: 8000
           readinessProbe:
