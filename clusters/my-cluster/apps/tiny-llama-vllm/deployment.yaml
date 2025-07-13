@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tiny-llama-vllm
+  labels:
+    app: tiny-llama-vllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tiny-llama-vllm
+  template:
+    metadata:
+      labels:
+        app: tiny-llama-vllm
+    spec:
+      containers:
+        - name: vllm
+          image: jozu.ml/oyedeletemitope76/tiny-llama-vllm/vllm-cpu:1.0.0
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
