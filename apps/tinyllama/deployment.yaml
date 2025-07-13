@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tiny-llama-deployment
+  namespace: vllm-system
+  labels:
+    app: tiny-llama
+    version: v1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tiny-llama
+  template:
+    metadata:
+      labels:
+        app: tiny-llama
+        version: v1.0.0
+    spec:
+      containers:
+        - name: vllm
+          image: "jozu.ml/oyedeletemitope76/tiny-llama-vllm/vllm-cpu:1.0.0"
+          # Using vllm serve command directly - no serve.py needed!
+          command: ["vllm", "serve"]
+          args:
+            - "/model"
+            - "--host=0.0.0.0"
+            - "--port=8000"
+            - "--trust-remote-code"
+            - "--enforce-eager"
+            - "--disable-custom-all-reduce"
+            - "--tensor-parallel-size=1"
+            - "--device=cpu"
+            - "--max-model-len=2048"
+            - "--served-model-name=tiny-llama"
+          env:
+            - name: VLLM_DEVICE
+              value: "cpu"
+            - name: VLLM_CPU_KVCACHE_SPACE
+              value: "4"
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
